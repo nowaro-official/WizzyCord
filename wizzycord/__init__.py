@@ -1,15 +1,15 @@
-"""
-WizzyCord - Eine Python-Bibliothek für [Beschreibung der Hauptfunktionen].
+# wizzycord/__init__.py
 
-Diese Bibliothek bietet Funktionen zum [kurze Beschreibung der Hauptfunktionalitäten].
+"""
+WizzyCord - Eine Python-Bibliothek für einfaches Pycord-Bot-Cog-Management.
+
+Diese Bibliothek bietet Funktionen zum Verwalten von Cogs in Pycord-Bots.
 """
 
-__version__ = "0.1.0"
-__author__ = "Ihr Name"
+__version__ = "0.2.0"
+__author__ = "kainow-code"
 __license__ = "MIT"
 
-from .modul1 import begruessung
+from .cog_manager import CogManager
 
-__all__ = ['begruessung']
-
-# Hier könnten Sie zusätzliche Initialisierungslogik hinzufügen, falls erforderlich
+__all__ = ['CogManager']
