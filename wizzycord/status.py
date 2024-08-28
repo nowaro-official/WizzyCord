@@ -1,11 +1,12 @@
+from typing import List
 import discord
 from discord.ext import commands, tasks
 import random
 
 class StatusChanger:
-    def __init__(self, bot):
+    def __init__(self, bot: commands.Bot):
         self.bot = bot
-        self.statuses = [
+        self.statuses: List[str] = [
             "mit Discord",
             "Hilfe: !help",
             "Version 1.0",
@@ -22,7 +23,7 @@ class StatusChanger:
         new_status = random.choice(self.statuses)
         await self.bot.change_presence(activity=discord.Game(name=new_status))
 
-def setup(bot):
+def setup(bot: commands.Bot) -> StatusChanger:
     status_changer = StatusChanger(bot)
     status_changer.start()
     return status_changer
