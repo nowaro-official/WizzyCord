@@ -1,27 +1,25 @@
+from typing import Mapping, Optional
 import discord
 from discord.ext import commands
 from .embed import EmbedTemplate
 
 class HelpCommand(commands.HelpCommand):
-    def __init__(self):
-        super().__init__()
-
-    async def send_bot_help(self, mapping):
+    async def send_bot_help(self, mapping: Mapping[Optional[commands.Cog], list[commands.Command]]):
         embed = EmbedTemplate.create_embed(
             title="Bot Hilfe",
             description="Hier ist eine Liste aller verfügbaren Befehle:",
             color=discord.Color.green()
         )
 
-        for cog, commands in mapping.items():
-            command_list = [command.name for command in commands if not command.hidden]
+        for cog, cmds in mapping.items():
+            command_list = [cmd.name for cmd in await self.filter_commands(cmds, sort=True)]
             if command_list:
                 cog_name = getattr(cog, "qualified_name", "Keine Kategorie")
                 embed.add_field(name=cog_name, value=", ".join(command_list), inline=False)
 
         await self.get_destination().send(embed=embed)
 
-    async def send_command_help(self, command):
+    async def send_command_help(self, command: commands.Command):
         embed = EmbedTemplate.create_embed(
             title=f"Hilfe für {command.name}",
             description=command.help or "Keine Beschreibung verfügbar.",
@@ -31,5 +29,5 @@ class HelpCommand(commands.HelpCommand):
 
         await self.get_destination().send(embed=embed)
 
-def setup(bot):
+def setup(bot: commands.Bot):
     bot.help_command = HelpCommand()
