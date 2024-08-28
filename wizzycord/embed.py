@@ -1,8 +1,14 @@
+from typing import Any, Dict, List, Optional
 import discord
 
 class EmbedTemplate:
     @staticmethod
-    def create_embed(title, description, color=discord.Color.blue(), **kwargs):
+    def create_embed(
+        title: str,
+        description: str,
+        color: discord.Color = discord.Color.blue(),
+        **kwargs: Any
+    ) -> discord.Embed:
         """
         Erstellt ein Discord Embed mit den angegebenen Parametern.
         
@@ -15,16 +21,17 @@ class EmbedTemplate:
         embed = discord.Embed(title=title, description=description, color=color)
         
         for key, value in kwargs.items():
-            if key == "fields":
-                for field in value:
-                    embed.add_field(name=field["name"], value=field["value"], inline=field.get("inline", True))
-            elif key == "footer":
-                embed.set_footer(text=value.get("text", ""), icon_url=value.get("icon_url", ""))
-            elif key == "thumbnail":
-                embed.set_thumbnail(url=value)
-            elif key == "image":
-                embed.set_image(url=value)
-            elif key == "author":
-                embed.set_author(name=value.get("name", ""), url=value.get("url", ""), icon_url=value.get("icon_url", ""))
+            match key:
+                case "fields":
+                    for field in value:
+                        embed.add_field(name=field["name"], value=field["value"], inline=field.get("inline", True))
+                case "footer":
+                    embed.set_footer(text=value.get("text", ""), icon_url=value.get("icon_url", ""))
+                case "thumbnail":
+                    embed.set_thumbnail(url=value)
+                case "image":
+                    embed.set_image(url=value)
+                case "author":
+                    embed.set_author(name=value.get("name", ""), url=value.get("url", ""), icon_url=value.get("icon_url", ""))
         
         return embed
