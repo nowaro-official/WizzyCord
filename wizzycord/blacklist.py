@@ -1,9 +1,10 @@
+from typing import Optional
 import discord
 from discord.ext import commands
 from .db import Database
 
 class Blacklist:
-    def __init__(self, db_path="blacklist.db"):
+    def __init__(self, db_path: str = "blacklist.db"):
         self.db = Database(db_path)
 
     async def setup(self):
@@ -24,7 +25,7 @@ class Blacklist:
         return bool(result)
 
 class BlacklistCog(commands.Cog):
-    def __init__(self, bot):
+    def __init__(self, bot: commands.Bot):
         self.bot = bot
         self.blacklist = Blacklist()
 
@@ -33,21 +34,21 @@ class BlacklistCog(commands.Cog):
 
     @commands.command()
     @commands.has_permissions(administrator=True)
-    async def blacklist(self, ctx, user: discord.User):
+    async def blacklist(self, ctx: commands.Context, user: discord.User):
         await self.blacklist.add_user(user.id)
         await ctx.send(f"{user.name} wurde zur Blacklist hinzugefügt.")
 
     @commands.command()
     @commands.has_permissions(administrator=True)
-    async def unblacklist(self, ctx, user: discord.User):
+    async def unblacklist(self, ctx: commands.Context, user: discord.User):
         await self.blacklist.remove_user(user.id)
         await ctx.send(f"{user.name} wurde von der Blacklist entfernt.")
 
     @commands.Cog.listener()
-    async def on_command(self, ctx):
+    async def on_command(self, ctx: commands.Context):
         if await self.blacklist.is_blacklisted(ctx.author.id):
             await ctx.send("Du bist auf der Blacklist und darfst keine Befehle verwenden.")
             raise commands.CheckFailure("User is blacklisted")
 
-def setup(bot):
+def setup(bot: commands.Bot):
     bot.add_cog(BlacklistCog(bot))
