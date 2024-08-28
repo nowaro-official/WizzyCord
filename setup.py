@@ -8,11 +8,11 @@ setup(
     description="Eine Pycord-optimierte Bibliothek für Discord-Bots",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
-    url="https://github.com/kainow-code/wizzycord",
+    url="https://github.com/yourusername/wizzycord",
     packages=find_packages(),
     install_requires=[
-        "py-cord>=2.4.0",
-        "aiosqlite>=0.17.0",
+        "py-cord==2.6.0",
+        "aiosqlite==0.19.0",
     ],
     classifiers=[
         "Development Status :: 3 - Alpha",
