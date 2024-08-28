@@ -116,4 +116,4 @@ Kontakt
 
 Bei Fragen oder Anregungen kannst du uns unter example@example.com erreichen.
 
-Danke, dass du WizzyCord verwendest!
+Danke, dass du WizzyCord verwendest
