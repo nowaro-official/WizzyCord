@@ -1,10 +1,11 @@
-from typing import Mapping, Optional
+from typing import Mapping, Optional, List
 import discord
 from discord.ext import commands
+
 from .embed import EmbedTemplate
 
 class HelpCommand(commands.HelpCommand):
-    async def send_bot_help(self, mapping: Mapping[Optional[commands.Cog], list[commands.Command]]):
+    async def send_bot_help(self, mapping: Mapping[Optional[commands.Cog], List[commands.Command]]):
         embed = EmbedTemplate.create_embed(
             title="Bot Hilfe",
             description="Hier ist eine Liste aller verfügbaren Befehle:",
