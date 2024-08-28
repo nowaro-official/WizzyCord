@@ -1,6 +1,9 @@
 
+![Wizzycord banner](https://github.com/user-attachments/assets/7aafe5ed-f52b-4d69-b69e-92c0fd22e351)
 
-![Banner](https://cdn.leonardo.ai/users/448575ec-2432-4881-8c84-d8f925a25b2f/generations/afce9e57-27e2-4d7d-b94f-d946848d3658/segments/3:4:2/Leonardo_Phoenix_A_mesmerizing_high_dynamic_range_HDR_photogra_0.jpg?w=712)
+
+
+
 
 # WizzyCord
 
@@ -26,94 +29,121 @@ Um **WizzyCord** zu installieren, verwende `pip`:
 
 ```bash
 pip install wizzycord
+```
 
-Nutzung
+## Nutzung
 
 Hier sind einige grundlegende Beispiele zur Nutzung der Bibliothek:
 
-Embed-Templates
+### Embed-Templates
 
+```python
 from wizzycord.embed import CustomEmbed
 
 embed = CustomEmbed(title="Mein Titel", description="Meine Beschreibung")
+```
 
-Automatischer Hilfe-Befehl
+### Automatischer Hilfe-Befehl
 
+```python
 from wizzycord.help import generate_help_command
 
 help_command = generate_help_command(bot)
+```
 
-Status-Wechsler
+### Status-Wechsler
 
+```python
 from wizzycord.status import StatusChanger
 
 status_changer = StatusChanger(bot, interval=60)
 status_changer.start()
+```
 
-Blacklist-Management
+### Blacklist-Management
 
+```python
 from wizzycord.blacklist import BlacklistManager
 
 blacklist_manager = BlacklistManager()
 blacklist_manager.add_user(user_id)
+```
 
-Datenbank-Wrapper
+### Datenbank-Wrapper
 
+```python
 from wizzycord.db import DatabaseWrapper
 
 db = DatabaseWrapper('database.db')
 await db.create_table('users', {'id': 'INTEGER PRIMARY KEY', 'name': 'TEXT'})
 await db.insert('users', {'name': 'Alice'})
+```
 
-Cog-Management
+### Cog-Management
 
+```python
 from wizzycord.cog_manager import CogManager
 
 cog_manager = CogManager(bot)
 cog_manager.load_cog('my_cog')
+```
 
-Fehlerbehandlung
+### Fehlerbehandlung
 
+```python
 from wizzycord.error_handling import ErrorHandler
 
 error_handler = ErrorHandler(bot)
 error_handler.setup()
+```
 
-Benutzerdefiniertes Logging
+### Benutzerdefiniertes Logging
 
+```python
 from wizzycord.logging import CustomLogger
 
 logger = CustomLogger()
 logger.info('Bot gestartet')
+```
 
-Datetime- und Datei-Utilities
+### Datetime- und Datei-Utilities
 
+```python
 from wizzycord.utils import get_current_datetime
 
 current_datetime = get_current_datetime()
+```
 
-Slash-Befehl-Übersetzung
+### Slash-Befehl-Übersetzung
 
+```python
 from wizzycord.translation import translate_slash_command
 
 translated_command = translate_slash_command('example_command', 'de')
+```
 
-Nachrichtentranslation
+### Nachrichtentranslation
 
+```python
 from wizzycord.translation import translate_message
 
 translated_message = translate_message('Hello, world!', 'es')
+```
 
-Lizenz
+## Lizenz
 
-WizzyCord ist unter der MIT-Lizenz lizenziert. Siehe die LICENSE Datei für Details.
+**WizzyCord** ist unter der MIT-Lizenz lizenziert. Siehe die [LICENSE](LICENSE) Datei für Details.
 
-Beiträge
+## Beiträge
 
 Beiträge sind willkommen! Bitte öffne ein Issue oder einen Pull Request, wenn du Verbesserungen vorschlagen oder Fehler melden möchtest.
 
-Kontakt
+## Kontakt
 
-Bei Fragen oder Anregungen kannst du uns unter example@example.com erreichen.
+Bei Fragen oder Anregungen kannst du uns unter [example@example.com](mailto:example@example.com) erreichen.
 
-Danke, dass du WizzyCord verwendest
+---
+
+Danke, dass du **WizzyCord** verwendest!
+
+```
