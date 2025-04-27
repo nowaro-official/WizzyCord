@@ -1,4 +1,3 @@
-
 ![Wizzycord banner](https://github.com/user-attachments/assets/38ff9059-f360-4535-8eab-127b94ff8339)
 
 # WizzyCord
@@ -17,88 +16,119 @@ pip install wizzycord
 
 - Python 3.9 oder höher (getestet bis Python 3.12)
 - Pycord 2.6.0
-- aiosqlite 0.19.0
 
 ## Funktionen
 
 WizzyCord bietet die folgenden Hauptfunktionen:
 
-1. **Embed-Templates**: Einfache Erstellung von benutzerdefinierten Embed-Nachrichten.
-2. **Automatischer Hilfe-Befehl**: Generiert automatisch einen Hilfe-Befehl für Ihren Bot.
-3. **Status-Wechsler**: Ändert den Status Ihres Bots in regelmäßigen Intervallen.
-4. **Blacklist-System**: Verwaltet eine Blacklist von Benutzern, die Ihren Bot nicht verwenden dürfen.
-5. **Datenbank-Wrapper**: Ein asynchroner Wrapper für SQLite-Datenbankoperationen, optimiert für die neueste aiosqlite-Version.
+1. **Benutzerlisten-Verwaltung**: Verwaltet Listen von Benutzer-IDs in JSON-Dateien
+2. **Berechtigungssystem**: Stellt Mechanismen bereit, um Befehle nur für bestimmte Benutzer verfügbar zu machen
+3. **Discord-Integration**: Optimiert für Pycord mit einfachen Guards für slash commands
 
 ## Verwendung
 
 Hier sind einige Beispiele, wie Sie WizzyCord in Ihrem Pycord-Bot verwenden können:
 
-### Embed-Templates
+### Benutzerliste verwalten
 
 ```python
-from wizzycord.embed import EmbedTemplate
+from wizzycord import UserList
 
-# In einem Bot-Befehl
-@bot.command()
-async def example(ctx):
-    embed = EmbedTemplate.create_embed(
-        title="Beispiel Embed",
-        description="Dies ist ein Beispiel-Embed",
-        color=discord.Color.green(),
-        fields=[
-            {"name": "Feld 1", "value": "Wert 1"},
-            {"name": "Feld 2", "value": "Wert 2"}
-        ]
-    )
-    await ctx.send(embed=embed)
+# Benutzerliste erstellen oder laden
+users = UserList("data/users.json")
+
+# Benutzer hinzufügen
+users.add(123456789)
+
+# Alle Benutzer abrufen
+all_users = users.get_all()
+print(all_users)  # [123456789]
+
+# Benutzer entfernen
+users.remove(123456789)
 ```
 
-### Automatischer Hilfe-Befehl
+### Berechtigungssystem für Discord-Befehle
 
 ```python
-from wizzycord.help import setup as setup_help
+from discord.ext import commands
+from discord import option
+from wizzycord import GuardCheck
 
-# In Ihrer Bot-Initialisierung
-setup_help(bot)
+# Bot erstellen
+bot = discord.Bot(intents=discord.Intents.all())
+
+# GuardCheck initialisieren
+checker = GuardCheck("data/admins.json")
+
+# Optionale benutzerdefinierte Fehlermeldung setzen
+checker.set_error_message("Du hast keine Admin-Rechte für diesen Befehl!")
+
+# Befehl mit Berechtigungsprüfung
+@bot.slash_command(name="admin", description="Ein Admin-Befehl")
+@checker.guard()
+async def admin_command(ctx):
+    await ctx.respond("Du hast Admin-Rechte!", ephemeral=True)
+
+# Befehl mit benutzerdefinierter Fehlermeldung
+@bot.slash_command(name="special", description="Ein spezieller Befehl")
+@checker.guard("Dieser Befehl ist nur für spezielle Benutzer!")
+async def special_command(ctx):
+    await ctx.respond("Du bist ein spezieller Benutzer!", ephemeral=True)
 ```
 
-### Status-Wechsler
+### Admin-Verwaltung
 
 ```python
-from wizzycord.status import setup as setup_status
+from discord import option
+from wizzycord import GuardCheck
 
-# In Ihrer Bot-Initialisierung
-status_changer = setup_status(bot)
+# GuardCheck initialisieren
+checker = GuardCheck("data/admins.json")
 
-# Um den Status-Wechsler zu stoppen
-# status_changer.stop()
+# Admin-Befehle Gruppe
+@bot.slash_command(name="admin", description="Admin-Befehle")
+async def admin(ctx):
+    pass
+
+# Fügt einen Benutzer zur Admin-Liste hinzu
+@admin.command(name="add", description="Fügt einen Benutzer zur Admin-Liste hinzu")
+@checker.guard()  # Nur vorhandene Admins können andere hinzufügen
+@option("user", discord.User, description="Der hinzuzufügende Benutzer")
+async def admin_add(ctx, user: discord.User):
+    if checker.add_user(user.id):
+        await ctx.respond(f"Benutzer {user.name} wurde zur Admin-Liste hinzugefügt!", ephemeral=True)
+    else:
+        await ctx.respond(f"Benutzer {user.name} ist bereits in der Admin-Liste!", ephemeral=True)
+
+# Zeigt alle Benutzer in der Admin-Liste an
+@admin.command(name="list", description="Zeigt alle Benutzer in der Admin-Liste an")
+@checker.guard()  # Nur Admins können die Liste sehen
+async def admin_list(ctx):
+    users = checker.get_users()
+    if not users:
+        await ctx.respond("Die Admin-Liste ist leer!", ephemeral=True)
+        return
+    
+    # Benutzernamen auflösen
+    user_strings = []
+    for user_id in users:
+        try:
+            user = await bot.fetch_user(user_id)
+            user_strings.append(f"{user.name} (ID: {user_id})")
+        except:
+            user_strings.append(f"Unbekannter Benutzer (ID: {user_id})")
+    
+    # Antwort formatieren
+    response = "**Admin-Liste:**\n" + "\n".join(user_strings)
+    await ctx.respond(response, ephemeral=True)
 ```
 
-### Blacklist-System
+## Technische Details
 
-```python
-from wizzycord.blacklist import BlacklistCog
-
-# In Ihrer Bot-Initialisierung
-bot.add_cog(BlacklistCog(bot))
-```
-
-### Datenbank-Wrapper
-
-```python
-from wizzycord.db import Database
-
-# In Ihrer Bot-Initialisierung oder in einem Cog
-db = Database("your_database.db")
-
-# Beispiel für eine Datenbankoperation
-async def add_user(user_id: int, username: str):
-    await db.execute("INSERT INTO users (id, name) VALUES (?, ?)", (user_id, username))
-
-# Beispiel für eine Massen-Datenbankoperation
-async def add_multiple_users(user_data: List[Tuple[int, str]]):
-    await db.executemany("INSERT INTO users (id, name) VALUES (?, ?)", user_data)
-```
+- Die `UserList`-Klasse speichert Benutzer-IDs in einer JSON-Datei
+- Die `GuardCheck`-Klasse verwendet das Singleton-Pattern für einfache Verwendung
+- Beide Klassen unterstützen das Nachladen der Benutzerliste zur Laufzeit
 
 ## Beitragen
 
