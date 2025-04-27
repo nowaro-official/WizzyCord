@@ -21,7 +21,7 @@ pip install wizzycord
 
 WizzyCord bietet die folgenden Hauptfunktionen:
 
-1. **Benutzerlisten-Verwaltung**: Verwaltet Listen von Benutzer-IDs in JSON-Dateien
+1. **Berechtigungslisten-Verwaltung**: Verwaltet Listen von Benutzer-IDs in JSON-Dateien
 2. **Berechtigungssystem**: Stellt Mechanismen bereit, um Befehle nur für bestimmte Benutzer verfügbar zu machen
 3. **Discord-Integration**: Optimiert für Pycord mit einfachen Guards für slash commands
 
@@ -29,13 +29,13 @@ WizzyCord bietet die folgenden Hauptfunktionen:
 
 Hier sind einige Beispiele, wie Sie WizzyCord in Ihrem Pycord-Bot verwenden können:
 
-### Benutzerliste verwalten
+### Berechtigungsliste verwalten
 
 ```python
-from wizzycord import UserList
+from wizzycord import GuardList
 
-# Benutzerliste erstellen oder laden
-users = UserList("data/users.json")
+# Berechtigungsliste erstellen oder laden
+users = GuardList("data/admins.json")
 
 # Benutzer hinzufügen
 users.add(123456789)
@@ -59,7 +59,7 @@ from wizzycord import GuardCheck
 bot = discord.Bot(intents=discord.Intents.all())
 
 # GuardCheck initialisieren
-checker = GuardCheck("data/admins.json")
+checker = GuardCheck("db/admins.json")
 
 # Optionale benutzerdefinierte Fehlermeldung setzen
 checker.set_error_message("Du hast keine Admin-Rechte für diesen Befehl!")
@@ -84,7 +84,7 @@ from discord import option
 from wizzycord import GuardCheck
 
 # GuardCheck initialisieren
-checker = GuardCheck("data/admins.json")
+checker = GuardCheck("db/admins.json")
 
 # Admin-Befehle Gruppe
 @bot.slash_command(name="admin", description="Admin-Befehle")
@@ -126,7 +126,7 @@ async def admin_list(ctx):
 
 ## Technische Details
 
-- Die `UserList`-Klasse speichert Benutzer-IDs in einer JSON-Datei
+- Die `GuardList`-Klasse speichert Benutzer-IDs in einer JSON-Datei
 - Die `GuardCheck`-Klasse verwendet das Singleton-Pattern für einfache Verwendung
 - Beide Klassen unterstützen das Nachladen der Benutzerliste zur Laufzeit
 
