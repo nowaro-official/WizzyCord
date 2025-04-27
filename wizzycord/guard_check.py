@@ -7,7 +7,7 @@ from pathlib import Path
 import discord
 from discord.ext import commands
 
-from .user_list import UserList
+from .guard_list import GuardList
 
 class GuardCheck:
     """
@@ -17,7 +17,7 @@ class GuardCheck:
     Attributes:
         db_path (Path): Pfad zur JSON-Datei mit der Benutzerliste
         error_message (str): Standardmeldung bei fehlenden Berechtigungen
-        _user_list (UserList): Instanz der UserList-Klasse
+        _guard_list (GuardList): Instanz der GuardList-Klasse
     """
     _instance = None
     
@@ -34,10 +34,10 @@ class GuardCheck:
         """
         if cls._instance is None:
             cls._instance = super(GuardCheck, cls).__new__(cls)
-            db_path = db_path or "db/userlist.json"
+            db_path = db_path or "db/guardlist.json"  # Geändert auf guardlist
             cls._instance.db_path = Path(db_path)
             cls._instance.error_message = "Du hast keine Berechtigung, diesen Befehl zu verwenden."
-            cls._instance._user_list = UserList(cls._instance.db_path)
+            cls._instance._guard_list = GuardList(cls._instance.db_path)
         return cls._instance
     
     def set_guard_list(self, path):
@@ -48,11 +48,11 @@ class GuardCheck:
             path (str or Path): Neuer Pfad zur JSON-Datei
         """
         self.db_path = Path(path)
-        self._user_list = UserList(self.db_path)
+        self._guard_list = GuardList(self.db_path)
     
     def reload(self):
         """Lädt die Benutzerliste aus der Datei neu."""
-        self._user_list.reload()
+        self._guard_list.reload()
     
     def get_users(self):
         """
@@ -61,8 +61,8 @@ class GuardCheck:
         Returns:
             list: Liste aller Benutzer-IDs
         """
-        self._user_list.reload()  # Stellt sicher, dass wir immer die neuesten Daten haben
-        return self._user_list.get_all()
+        self._guard_list.reload()  # Stellt sicher, dass wir immer die neuesten Daten haben
+        return self._guard_list.get_all()
     
     def is_listed(self, user_id):
         """
@@ -74,8 +74,8 @@ class GuardCheck:
         Returns:
             bool: True wenn in Liste, sonst False
         """
-        self._user_list.reload()  # Stellt sicher, dass wir immer die neuesten Daten haben
-        return self._user_list.is_listed(user_id)
+        self._guard_list.reload()  # Stellt sicher, dass wir immer die neuesten Daten haben
+        return self._guard_list.is_listed(user_id)
     
     def add_user(self, user_id):
         """
@@ -87,7 +87,7 @@ class GuardCheck:
         Returns:
             bool: True bei Erfolg, False bei Fehler
         """
-        return self._user_list.add(user_id)
+        return self._guard_list.add(user_id)
     
     def remove_user(self, user_id):
         """
@@ -99,7 +99,7 @@ class GuardCheck:
         Returns:
             bool: True bei Erfolg, False bei Fehler
         """
-        return self._user_list.remove(user_id)
+        return self._guard_list.remove(user_id)
     
     def set_error_message(self, message):
         """
