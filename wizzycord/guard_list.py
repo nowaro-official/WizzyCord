@@ -1,12 +1,12 @@
 """
-User List - Eine Klasse zum Verwalten von Benutzer-IDs in einer JSON-Datei
+Guard List - Eine Klasse zum Verwalten von Benutzer-IDs in einer JSON-Datei
 """
 
 import json
 import os
 from pathlib import Path
 
-class UserList:
+class GuardList:
     """
     Verwaltet eine Liste von Benutzer-IDs in einer JSON-Datei.
     
@@ -17,7 +17,7 @@ class UserList:
     
     def __init__(self, file):
         """
-        Initialisiert die UserList mit einem Dateipfad.
+        Initialisiert die GuardList mit einem Dateipfad.
         
         Args:
             file (str or Path): Pfad zur JSON-Datei
