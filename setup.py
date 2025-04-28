@@ -9,10 +9,10 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name="wizzycord",
-    version="0.1.1",
+    version="0.2.0",  # Version aktualisiert wegen neuer Funktionalität
     author="Nowaro",
     author_email="dev@nowaro.de",
-    description="Eine Bibliothek zur Verwaltung von Benutzerlisten mit Discord-Integration",
+    description="Eine Bibliothek zur Verwaltung von Benutzerlisten und für farbige Konsolenausgaben mit Discord-Integration",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/nowaro-official/wizzycord",
