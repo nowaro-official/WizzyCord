@@ -24,6 +24,8 @@ WizzyCord bietet die folgenden Hauptfunktionen:
 1. **Berechtigungslisten-Verwaltung**: Verwaltet Listen von Benutzer-IDs in JSON-Dateien
 2. **Berechtigungssystem**: Stellt Mechanismen bereit, um Befehle nur für bestimmte Benutzer verfügbar zu machen
 3. **Discord-Integration**: Optimiert für Pycord mit einfachen Guards für slash commands
+4. **Farbige Konsolenausgabe**: Ermöglicht ansprechende farbige Ausgaben im Terminal
+5. **Bot-Interface**: Zeigt eine gut formatierte Startanzeige für Ihren Bot an
 
 ## Verwendung
 
@@ -124,11 +126,62 @@ async def admin_list(ctx):
     await ctx.respond(response, ephemeral=True)
 ```
 
+### Farbige Konsolenausgabe
+
+```python
+from wizzycord import init, colored_text, Colors, log_info, log_success, log_warning, log_error
+
+# Farbunterstützung aktivieren
+init()
+
+# Basisbeispiele für farbigen Text
+print(colored_text("Das ist rot!", Colors.RED))
+print(colored_text("Das ist fett und grün!", Colors.GREEN, Colors.BOLD))
+print(colored_text("Das ist unterstrichen und blau", Colors.BLUE, Colors.UNDERLINE))
+
+# Beispiele für Logging-Funktionen
+log_info("Der Bot wird gestartet...")
+log_success("Der Bot wurde erfolgreich gestartet!")
+log_warning("Ein Befehl konnte nicht geladen werden.")
+log_error("Verbindung zum Discord-Server fehlgeschlagen!")
+```
+
+### Bot-Interface anzeigen
+
+```python
+import discord
+from wizzycord import init, display_bot_interface
+
+# Bot-Konfiguration
+bot = discord.Bot(intents=discord.Intents.default())
+
+@bot.event
+async def on_ready():
+    """Wird ausgelöst, wenn der Bot bereit ist"""
+    # Besitzer abrufen (Optional)
+    owner = await bot.fetch_user(OWNER_ID)
+    
+    # Farbunterstützung aktivieren
+    init()
+    
+    # Bot-Interface anzeigen
+    display_bot_interface(
+        bot_name=bot.user.name,
+        owner_name=owner.name,
+        ping=bot.latency * 1000,
+        commands=10,  # Anzahl der geladenen Befehle
+        servers=len(bot.guilds),
+        cogs=["cogs.admin", "cogs.utils"]  # Liste der geladenen Cogs/Module
+    )
+```
+
 ## Technische Details
 
 - Die `GuardList`-Klasse speichert Benutzer-IDs in einer JSON-Datei
 - Die `GuardCheck`-Klasse verwendet das Singleton-Pattern für einfache Verwendung
 - Beide Klassen unterstützen das Nachladen der Benutzerliste zur Laufzeit
+- Die `wizzycolor`-Funktionen bieten plattformübergreifende Unterstützung für farbige Konsolenausgaben
+- Die Farbunterstützung wird automatisch für Windows und Unix-basierte Systeme konfiguriert
 
 ## Beitragen
 
