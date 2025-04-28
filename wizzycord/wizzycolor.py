@@ -1,5 +1,5 @@
 """
-wizzycolor - Ein einfaches Modul für farbige Ausgaben in Discord-Bots
+WizzyColor - Ein einfaches Modul für farbige Ausgaben in Discord-Bots
 """
 import os
 import time
