@@ -129,21 +129,24 @@ async def admin_list(ctx):
 ### Farbige Konsolenausgabe
 
 ```python
-from wizzycord import init, colored_text, Colors, log_info, log_success, log_warning, log_error
+from wizzycord import init, Fore, Style, create_message_line, display_status_line
 
 # Farbunterstützung aktivieren
 init()
 
 # Basisbeispiele für farbigen Text
-print(colored_text("Das ist rot!", Colors.RED))
-print(colored_text("Das ist fett und grün!", Colors.GREEN, Colors.BOLD))
-print(colored_text("Das ist unterstrichen und blau", Colors.BLUE, Colors.UNDERLINE))
+print(f"{Fore.RED}Das ist rot!{Fore.RESET}")
+print(f"{Style.BOLD}{Fore.GREEN}Das ist fett und grün!{Style.RESET_ALL}")
+print(f"{Style.UNDERLINE}{Fore.BLUE}Das ist unterstrichen und blau{Style.RESET_ALL}")
 
-# Beispiele für Logging-Funktionen
-log_info("Der Bot wird gestartet...")
-log_success("Der Bot wurde erfolgreich gestartet!")
-log_warning("Ein Befehl konnte nicht geladen werden.")
-log_error("Verbindung zum Discord-Server fehlgeschlagen!")
+# Statuszeilen anzeigen
+print(display_status_line("Der Bot wird gestartet...", "info"))
+print(display_status_line("Der Bot wurde erfolgreich gestartet!", "success"))
+print(display_status_line("Ein Befehl konnte nicht geladen werden.", "warning"))
+print(display_status_line("Verbindung zum Discord-Server fehlgeschlagen!", "error"))
+
+# Einfache Nachrichtenboxen
+print(create_message_line("Willkommen zurück!"))
 ```
 
 ### Bot-Interface anzeigen
@@ -173,6 +176,25 @@ async def on_ready():
         servers=len(bot.guilds),
         cogs=["cogs.admin", "cogs.utils"]  # Liste der geladenen Cogs/Module
     )
+```
+
+### Discord-Embed-Farben verwenden
+
+```python
+from discord import Embed
+from wizzycord import Color
+
+# Einen schönen Embed mit vordefinierten Farben erstellen
+embed = Embed(
+    title="Willkommens-Nachricht",
+    description="Herzlich willkommen auf unserem Server!",
+    color=Color.BLURPLE  # Discord's Blau/Lila Farbe
+)
+
+# Weitere Beispiele für Embed-Farben
+success_embed = Embed(title="Erfolg", color=Color.SUCCESS)
+warning_embed = Embed(title="Warnung", color=Color.WARNING)
+error_embed = Embed(title="Fehler", color=Color.ERROR)
 ```
 
 ## Technische Details
