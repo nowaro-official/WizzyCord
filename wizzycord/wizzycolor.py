@@ -1,20 +1,11 @@
 """
-WizzyColor - Ein Modul für farbige Konsolenausgaben und Bot-Interface-Darstellung
+wizzycolor - Ein einfaches Modul für farbige Ausgaben in Discord-Bots
 """
-
 import os
-import platform
-from datetime import datetime
+import time
 
-# ANSI-Farbcodes
-class Colors:
-    RESET = '\033[0m'
-    BOLD = '\033[1m'
-    FAINT = '\033[2m'
-    ITALIC = '\033[3m'
-    UNDERLINE = '\033[4m'
-    
-    # Vordergrundfarben
+# Konsolenfarben
+class Fore:
     BLACK = '\033[30m'
     RED = '\033[31m'
     GREEN = '\033[32m'
@@ -23,161 +14,284 @@ class Colors:
     MAGENTA = '\033[35m'
     CYAN = '\033[36m'
     WHITE = '\033[37m'
-    
-    # Helle Vordergrundfarben
-    BRIGHT_BLACK = '\033[90m'
-    BRIGHT_RED = '\033[91m'
-    BRIGHT_GREEN = '\033[92m'
-    BRIGHT_YELLOW = '\033[93m'
-    BRIGHT_BLUE = '\033[94m'
-    BRIGHT_MAGENTA = '\033[95m'
-    BRIGHT_CYAN = '\033[96m'
-    BRIGHT_WHITE = '\033[97m'
-    
-    # Hintergrundfarben
-    BG_BLACK = '\033[40m'
-    BG_RED = '\033[41m'
-    BG_GREEN = '\033[42m'
-    BG_YELLOW = '\033[43m'
-    BG_BLUE = '\033[44m'
-    BG_MAGENTA = '\033[45m'
-    BG_CYAN = '\033[46m'
-    BG_WHITE = '\033[47m'
+    RESET = '\033[0m'
 
-# Globale Variablen
-_color_enabled = False
-_system = platform.system()
+# Konsolenstile
+class Style:
+    RESET_ALL = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
 
+# Box-Zeichen für Tabellen
+BOX_CHARS = {
+    'h_line': '─',
+    'v_line': '│',
+    'top_left': '┌',
+    'top_right': '┐',
+    'bottom_left': '└',
+    'bottom_right': '┘',
+    'middle_left': '├',
+    'middle_right': '┤',
+    'cross': '┼'
+}
+
+# Discord-Farben für Embeds
+class Color:
+    DEFAULT = 0x000000      # Schwarz
+    RED = 0xFF0000          # Rot
+    GREEN = 0x00FF00        # Grün
+    BLUE = 0x0000FF         # Blau
+    YELLOW = 0xFFFF00       # Gelb
+    CYAN = 0x00FFFF         # Cyan
+    MAGENTA = 0xFF00FF      # Magenta
+    WHITE = 0xFFFFFF        # Weiß
+    
+    # Discord-Farbpalette
+    BLURPLE = 0x5865F2      # Discord Blau/Lila
+    SUCCESS = 0x57F287      # Erfolg (Grün)
+    WARNING = 0xFEE75C      # Warnung (Gelb)
+    ERROR = 0xED4245        # Fehler (Rot)
+
+# Initialisierung für Windows-Farbunterstützung
 def init():
-    """
-    Initialisiert die Farbunterstützung für die Konsole.
-    
-    Unter Windows wird die ANSI-Farbunterstützung aktiviert, 
-    falls notwendig und verfügbar.
-    """
-    global _color_enabled
-    
-    # Windows-spezifische Konfiguration
-    if _system == 'Windows':
+    """Aktiviert ANSI-Farben in der Windows-Konsole"""
+    import os
+    if os.name == 'nt':
         try:
-            # ANSI-Farbcodes für Windows-Konsole aktivieren
             import ctypes
             kernel32 = ctypes.windll.kernel32
             kernel32.SetConsoleMode(kernel32.GetStdHandle(-11), 7)
-            _color_enabled = True
         except:
-            _color_enabled = False
-    else:
-        # Auf Unix-basierten Systemen generell Farbunterstützung aktivieren
-        _color_enabled = True
-    
-    return _color_enabled
+            pass
+    return True
 
-def colored_text(text, color=None, style=None, bg_color=None):
+def create_exact_table(bot_name="", owner_name="", ping="", commands=0, servers=0):
     """
-    Formatiert Text mit Farben und Stilen.
+    Erstellt eine Tabelle nach dem Beispiel
     
-    Args:
-        text (str): Der zu formatierende Text
-        color (str, optional): Vordergrundfarbe aus Colors-Klasse
-        style (str, optional): Textstil aus Colors-Klasse
-        bg_color (str, optional): Hintergrundfarbe aus Colors-Klasse
-        
+    Parameters:
+    - bot_name: Name des Bots (optional)
+    - owner_name: Name des Besitzers (optional)
+    - ping: Ping in ms (optional)
+    - commands: Anzahl der Befehle (optional)
+    - servers: Anzahl der Server (optional)
+    
     Returns:
-        str: Der formatierte Text mit Farb-Codes
+    - Formatierte Tabelle als String
     """
-    if not _color_enabled:
-        return text
+    # Exakte Spaltenbreiten
+    bot_width = 25
+    owner_width = 25
+    ping_width = 12
+    commands_width = 9
+    server_width = 8
     
-    format_str = ""
-    if style:
-        format_str += style
-    if color:
-        format_str += color
-    if bg_color:
-        format_str += bg_color
+    # Ping als String formatieren, falls es eine Zahl ist
+    ping_str = f"{ping:.2f}ms" if isinstance(ping, float) else ping
     
-    return f"{format_str}{text}{Colors.RESET}"
+    # Gesamtbreite berechnen
+    total_width = bot_width + owner_width + ping_width + commands_width + server_width + 6  # +6 für die Trennlinien
+    
+    # Tabelle erstellen
+    lines = []
+    
+    # Oberer Rahmen
+    lines.append(f"{Fore.WHITE}{BOX_CHARS['top_left']}{BOX_CHARS['h_line'] * (total_width - 2)}{BOX_CHARS['top_right']}")
+    
+    # Überschriftenzeile
+    header_line = f"{Fore.WHITE}{BOX_CHARS['v_line']}"
+    header_line += f"{Fore.RED}Bot{' ' * (bot_width - 3)}"
+    header_line += f"{Fore.WHITE}{BOX_CHARS['v_line']}"
+    header_line += f"{Fore.YELLOW}Owner{' ' * (owner_width - 5)}"
+    header_line += f"{Fore.WHITE}{BOX_CHARS['v_line']}"
+    header_line += f"{Fore.BLUE}Ping{' ' * (ping_width - 4)}"
+    header_line += f"{Fore.WHITE}{BOX_CHARS['v_line']}"
+    header_line += f"{Fore.GREEN}Befehle{' ' * (commands_width - 7)}"
+    header_line += f"{Fore.WHITE}{BOX_CHARS['v_line']}"
+    header_line += f"{Fore.MAGENTA}Server{' ' * (server_width - 6)}"
+    header_line += f"{Fore.WHITE}{BOX_CHARS['v_line']}"
+    lines.append(header_line)
+    
+    # Trennlinie
+    separator = f"{Fore.WHITE}{BOX_CHARS['middle_left']}"
+    separator += f"{BOX_CHARS['h_line'] * bot_width}{BOX_CHARS['cross']}"
+    separator += f"{BOX_CHARS['h_line'] * owner_width}{BOX_CHARS['cross']}"
+    separator += f"{BOX_CHARS['h_line'] * ping_width}{BOX_CHARS['cross']}"
+    separator += f"{BOX_CHARS['h_line'] * commands_width}{BOX_CHARS['cross']}"
+    separator += f"{BOX_CHARS['h_line'] * server_width}{BOX_CHARS['middle_right']}"
+    lines.append(separator)
+    
+    # Datenzeile
+    data_line = f"{Fore.WHITE}{BOX_CHARS['v_line']}"
+    data_line += f"{Fore.RED}{bot_name}{' ' * (bot_width - len(str(bot_name)))}"
+    data_line += f"{Fore.WHITE}{BOX_CHARS['v_line']}"
+    data_line += f"{Fore.YELLOW}{owner_name}{' ' * (owner_width - len(str(owner_name)))}"
+    data_line += f"{Fore.WHITE}{BOX_CHARS['v_line']}"
+    data_line += f"{Fore.BLUE}{ping_str}{' ' * (ping_width - len(str(ping_str)))}"
+    data_line += f"{Fore.WHITE}{BOX_CHARS['v_line']}"
+    data_line += f"{Fore.GREEN}{commands}{' ' * (commands_width - len(str(commands)))}"
+    data_line += f"{Fore.WHITE}{BOX_CHARS['v_line']}"
+    data_line += f"{Fore.MAGENTA}{servers}{' ' * (server_width - len(str(servers)))}"
+    data_line += f"{Fore.WHITE}{BOX_CHARS['v_line']}"
+    lines.append(data_line)
+    
+    # Unterer Rahmen
+    lines.append(f"{Fore.WHITE}{BOX_CHARS['bottom_left']}{BOX_CHARS['h_line'] * (total_width - 2)}{BOX_CHARS['bottom_right']}")
+    
+    return "\n".join(lines)
 
-def display_bot_interface(bot_name, owner_name, ping=0, commands=0, servers=0, cogs=None):
+def create_exact_status_box(title, content, width=36, title_color=None, content_color=None):
     """
-    Zeigt eine schöne Konsolenanzeige für den Bot-Start an.
+    Erstellt eine Status-Box exakt wie im Screenshot
     
-    Args:
-        bot_name (str): Name des Bots
-        owner_name (str): Name des Bot-Besitzers
-        ping (float, optional): Latenz des Bots in ms
-        commands (int, optional): Anzahl der geladenen Befehle
-        servers (int, optional): Anzahl der Server, auf denen der Bot läuft
-        cogs (list, optional): Liste der geladenen Cogs/Module
+    Parameters:
+    - title: Titel der Box (z.B. "Bot-Status")
+    - content: Inhalt (z.B. "Ich bin online")
+    - width: Breite der Box
+    - title_color: Farbe des Titels (optional)
+    - content_color: Farbe des Inhalts (optional)
+    
+    Returns:
+    - Formatierte Status-Box als String
     """
-    if not _color_enabled:
-        init()
+    # Standardfarben, falls nicht angegeben
+    if title_color is None:
+        title_color = Fore.WHITE
+    if content_color is None:
+        content_color = Fore.GREEN if title == "Bot-Status" else Fore.WHITE
     
-    # Aktuelles Datum und Uhrzeit
-    now = datetime.now().strftime("%d.%m.%Y %H:%M:%S")
+    # Box erstellen
+    lines = []
     
-    # ASCII-Art Banner erstellen
-    banner = [
-        "╔═══════════════════════════════════════════════════════════╗",
-        "║                                                           ║",
-        f"║  {colored_text('WIZZY', Colors.BRIGHT_CYAN, Colors.BOLD)}{colored_text('CORD', Colors.BRIGHT_MAGENTA, Colors.BOLD)}                                             ║",
-        "║                                                           ║",
-        "╚═══════════════════════════════════════════════════════════╝"
-    ]
+    # Oberer Rahmen
+    lines.append(f"{Fore.WHITE}{BOX_CHARS['top_left']}{BOX_CHARS['h_line'] * (width - 2)}{BOX_CHARS['top_right']}")
     
-    # Informationen
-    info = [
-        f"Bot: {colored_text(bot_name, Colors.BRIGHT_GREEN, Colors.BOLD)}",
-        f"Besitzer: {colored_text(owner_name, Colors.BRIGHT_YELLOW)}",
-        f"Startzeit: {colored_text(now, Colors.BRIGHT_BLUE)}",
-        f"Ping: {colored_text(f'{ping:.2f}ms', Colors.BRIGHT_MAGENTA)}",
-        f"Befehle: {colored_text(str(commands), Colors.BRIGHT_CYAN)}",
-        f"Server: {colored_text(str(servers), Colors.BRIGHT_GREEN)}"
-    ]
+    # Inhaltszeile
+    # Genau wie im Screenshot: Text direkt nach dem Rahmen ohne Leerzeichen
+    padding = width - len(title) - len(content) - 2 - 2  # -2 für Rahmen und -2 für ": "
+    lines.append(f"{Fore.WHITE}{BOX_CHARS['v_line']}{title_color}{title}: {content_color}{content}{Fore.WHITE}{' ' * padding}{BOX_CHARS['v_line']}")
     
-    # Cogs/Module Informationen
-    if cogs:
-        cogs_info = f"Geladene Module: {colored_text(str(len(cogs)), Colors.BRIGHT_YELLOW)}"
-        cogs_list = ", ".join([colored_text(cog.split('.')[-1], Colors.BRIGHT_BLUE) for cog in cogs])
-    else:
-        cogs_info = f"Geladene Module: {colored_text('0', Colors.BRIGHT_RED)}"
-        cogs_list = ""
+    # Unterer Rahmen
+    lines.append(f"{Fore.WHITE}{BOX_CHARS['bottom_left']}{BOX_CHARS['h_line'] * (width - 2)}{BOX_CHARS['bottom_right']}")
     
-    # Ausgabe
-    print("\n" + "\n".join(banner))
-    print("\n" + "\n".join(info))
-    print(cogs_info)
-    if cogs_list:
-        print(f"Module: {cogs_list}")
-    print("\n" + colored_text("Bot ist jetzt online und bereit!", Colors.BRIGHT_GREEN, Colors.BOLD))
-    print("=" * 60 + "\n")
+    return "\n".join(lines)
 
-# Einfache Logging-Funktionen
-def log_info(message):
-    """Gibt eine Info-Meldung aus"""
-    timestamp = datetime.now().strftime("%H:%M:%S")
-    prefix = colored_text("[INFO]", Colors.BRIGHT_BLUE, Colors.BOLD)
-    time = colored_text(f"[{timestamp}]", Colors.BRIGHT_BLACK)
-    print(f"{time} {prefix} {message}")
+def display_cogs(cogs):
+    """
+    Zeigt die geladenen Cogs an
+    
+    Parameters:
+    - cogs: Liste der geladenen Cogs
+    
+    Returns:
+    - Formatierte Liste der Cogs als String
+    """
+    if not cogs:
+        return f"{Fore.WHITE}Keine Cogs geladen."
+    
+    lines = [f"{Fore.WHITE}Geladene Cogs:"]
+    
+    for i, cog in enumerate(cogs, 1):
+        lines.append(f"{Fore.GREEN}{i}. {Fore.WHITE}{cog}")
+    
+    return "\n".join(lines)
 
-def log_success(message):
-    """Gibt eine Erfolgs-Meldung aus"""
-    timestamp = datetime.now().strftime("%H:%M:%S")
-    prefix = colored_text("[SUCCESS]", Colors.BRIGHT_GREEN, Colors.BOLD)
-    time = colored_text(f"[{timestamp}]", Colors.BRIGHT_BLACK)
-    print(f"{time} {prefix} {message}")
+def display_bot_interface(bot_name="", owner_name="", ping="", commands=0, servers=0, cogs=None, timestamp=None, 
+                         show_table=True, show_status=True, show_cogs=True):
+    """
+    Zeigt das vollständige Bot-Interface an
+    
+    Parameters:
+    - bot_name: Name des Bots (optional)
+    - owner_name: Name des Besitzers (optional)
+    - ping: Ping in ms (optional)
+    - commands: Anzahl der Befehle (optional)
+    - servers: Anzahl der Server (optional)
+    - cogs: Liste der geladenen Cogs (optional)
+    - timestamp: Zeitstempel (optional)
+    - show_table: Tabelle anzeigen (optional, Standard: True)
+    - show_status: Status-Boxen anzeigen (optional, Standard: True)
+    - show_cogs: Cog-Liste anzeigen (optional, Standard: True)
+    """
+    # Konsole löschen
+    os.system('cls' if os.name == 'nt' else 'clear')
+    
+    # Standardzeitstempel, falls keiner angegeben wurde
+    if timestamp is None:
+        timestamp = time.strftime('%d.%m.%Y %H:%M:%S')
+    
+    # Tabelle anzeigen, falls gewünscht
+    if show_table:
+        table = create_exact_table(bot_name, owner_name, ping, commands, servers)
+        print(table)
+        print()  # Leerzeile
+    
+    # Statusboxen anzeigen, falls gewünscht
+    if show_status:
+        status_box = create_exact_status_box("Bot-Status", "Ich bin online")
+        print(status_box)
+        time_box = create_exact_status_box("Gestartet am", timestamp)
+        print(time_box)
+    
+    # Cogs anzeigen, falls gewünscht und vorhanden
+    if show_cogs and cogs:
+        print()  # Leerzeile
+        print(display_cogs(cogs))
 
-def log_warning(message):
-    """Gibt eine Warnmeldung aus"""
-    timestamp = datetime.now().strftime("%H:%M:%S")
-    prefix = colored_text("[WARNING]", Colors.BRIGHT_YELLOW, Colors.BOLD)
-    time = colored_text(f"[{timestamp}]", Colors.BRIGHT_BLACK)
-    print(f"{time} {prefix} {message}")
+def create_message_line(message, width=60, color=Fore.CYAN):
+    """
+    Erstellt eine einfache Mitteilungszeile mit farbigem Text
+    
+    Parameters:
+    - message: Die Mitteilung, die angezeigt werden soll
+    - width: Die Breite der Zeile (Standard: 60)
+    - color: Die Farbe der Mitteilung (Standard: Cyan)
+    
+    Returns:
+    - Formatierte Mitteilungszeile als String
+    """
+    # Rahmen erstellen
+    top_border = f"{Fore.WHITE}{BOX_CHARS['top_left']}{BOX_CHARS['h_line'] * (width - 2)}{BOX_CHARS['top_right']}"
+    bottom_border = f"{Fore.WHITE}{BOX_CHARS['bottom_left']}{BOX_CHARS['h_line'] * (width - 2)}{BOX_CHARS['bottom_right']}"
+    
+    # Mitteilung formatieren
+    # Wenn die Mitteilung zu lang ist, kürzen
+    if len(message) > width - 4:
+        message = message[:width - 7] + "..."
+    
+    # Zeile mit Mitteilung erstellen
+    message_line = f"{Fore.WHITE}{BOX_CHARS['v_line']} {color}{message}{Fore.WHITE}{' ' * (width - len(message) - 3)}{BOX_CHARS['v_line']}"
+    
+    # Alles zusammenfügen
+    return f"{top_border}\n{message_line}\n{bottom_border}"
 
-def log_error(message):
-    """Gibt eine Fehlermeldung aus"""
-    timestamp = datetime.now().strftime("%H:%M:%S")
-    prefix = colored_text("[ERROR]", Colors.BRIGHT_RED, Colors.BOLD)
-    time = colored_text(f"[{timestamp}]", Colors.BRIGHT_BLACK)
-    print(f"{time} {prefix} {message}")
+def display_status_line(message, status="info"):
+    """
+    Zeigt eine Statuszeile mit farbcodiertem Status an
+    
+    Parameters:
+    - message: Die Statusmeldung
+    - status: Status-Typ (info, success, warning, error)
+    
+    Returns:
+    - Formatierte Statuszeile
+    """
+    # Farbe basierend auf Status wählen
+    color = Fore.CYAN  # Standard: Info (Cyan)
+    prefix = "INFO"
+    
+    if status.lower() == "success":
+        color = Fore.GREEN
+        prefix = "ERFOLG"
+    elif status.lower() == "warning":
+        color = Fore.YELLOW
+        prefix = "WARNUNG"
+    elif status.lower() == "error":
+        color = Fore.RED
+        prefix = "FEHLER"
+    
+    # Mitteilung mit Präfix
+    full_message = f"[{prefix}] {message}"
+    
+    # Mitteilungszeile erstellen und zurückgeben
+    return create_message_line(full_message, color=color)
