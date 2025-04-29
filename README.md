@@ -64,6 +64,9 @@ bot = discord.Bot(intents=discord.Intents.all())
 # GuardCheck initialisieren
 checker = GuardCheck("db/admins.json")
 
+# Fehlerhandler für benutzerdefinierte Fehlermeldungen einrichten (NEU)
+checker.setup_handler(bot)
+
 # Optionale benutzerdefinierte Fehlermeldung setzen
 checker.set_error_message("Du hast keine Admin-Rechte für diesen Befehl!")
 
@@ -222,7 +225,36 @@ else:
     print("Fehler beim Laden des Musik-Cogs.")
 ```
 
-### Komplettes Bot-Setup
+### GuardCheck mit Fehlerhandler (NEU)
+
+```python
+from wizzycord import GuardCheck
+
+# Bot erstellen
+bot = discord.Bot(intents=discord.Intents.default())
+
+# GuardCheck initialisieren
+checker = GuardCheck("db/admins.json")
+
+# Fehlerhandler für automatische Fehlermeldungen einrichten
+checker.setup_handler(bot)
+
+# Jetzt können individuelle Fehlermeldungen pro Befehl gesetzt werden
+@bot.slash_command(name="wichtig", description="Ein wichtiger Befehl")
+@checker.guard("Dieser Befehl erfordert spezielle Berechtigungen!")
+async def wichtiger_befehl(ctx):
+    await ctx.respond("Du hast den wichtigen Befehl ausgeführt!")
+
+@bot.slash_command(name="geheim", description="Ein geheimer Befehl")
+@checker.guard("Nur ausgewählte Personen können diesen Befehl nutzen.")
+async def geheimer_befehl(ctx):
+    await ctx.respond("Du hast den geheimen Befehl ausgeführt!")
+
+# Für beide Befehle werden automatisch die individuellen Fehlermeldungen angezeigt,
+# ohne dass zusätzlicher Code geschrieben werden muss
+```
+
+## Komplettes Bot-Setup
 
 ```python
 import discord
@@ -247,6 +279,7 @@ bot = discord.Bot(intents=intents)
 
 # GuardCheck initialisieren
 checker = GuardCheck("db/admins.json")
+checker.setup_handler(bot)  # NEU: Fehlerhandler einrichten
 
 @bot.event
 async def on_ready():
@@ -285,6 +318,8 @@ if __name__ == "__main__":
 
 - Die `GuardList`-Klasse speichert Benutzer-IDs in einer JSON-Datei
 - Die `GuardCheck`-Klasse verwendet das Singleton-Pattern für einfache Verwendung
+- **NEU:** `GuardCheck` unterstützt jetzt individuelle Fehlermeldungen pro Befehl
+- **NEU:** `GuardCheck` bietet einen automatischen Fehlerhandler für bessere Benutzererfahrung
 - Beide Klassen unterstützen das Nachladen der Benutzerliste zur Laufzeit
 - Die `wizzycolor`-Funktionen bieten plattformübergreifende Unterstützung für farbige Konsolenausgaben
 - Die Farbunterstützung wird automatisch für Windows und Unix-basierte Systeme konfiguriert
