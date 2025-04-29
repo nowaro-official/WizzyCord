@@ -26,6 +26,7 @@ WizzyCord bietet die folgenden Hauptfunktionen:
 3. **Discord-Integration**: Optimiert für Pycord mit einfachen Guards für slash commands
 4. **Farbige Konsolenausgabe**: Ermöglicht ansprechende farbige Ausgaben im Terminal
 5. **Bot-Interface**: Zeigt eine gut formatierte Startanzeige für Ihren Bot an
+6. **Cog-Verwaltung**: Vereinfacht das Laden von Cogs/Modulen in Ihrem Discord-Bot
 
 ## Verwendung
 
@@ -197,6 +198,89 @@ warning_embed = Embed(title="Warnung", color=Color.WARNING)
 error_embed = Embed(title="Fehler", color=Color.ERROR)
 ```
 
+### Cogs verwalten
+
+```python
+import discord
+from wizzycord import load_all_cogs, load_specific_cog
+
+# Bot erstellen
+bot = discord.Bot(intents=discord.Intents.default())
+
+# Alle Cogs aus dem Standard-Verzeichnis laden
+loaded_cogs, command_count = load_all_cogs(bot)
+print(f"{len(loaded_cogs)} Cogs geladen mit insgesamt {command_count} Befehlen.")
+
+# ODER: Alle Cogs aus einem benutzerdefinierten Verzeichnis laden
+loaded_cogs, command_count = load_all_cogs(bot, "modules")
+
+# Ein einzelnes Cog laden
+success = load_specific_cog(bot, "musik")
+if success:
+    print("Musik-Cog erfolgreich geladen!")
+else:
+    print("Fehler beim Laden des Musik-Cogs.")
+```
+
+### Komplettes Bot-Setup
+
+```python
+import discord
+import os
+from dotenv import load_dotenv
+from wizzycord import (
+    init, 
+    display_bot_interface,
+    load_all_cogs,
+    GuardCheck
+)
+
+# .env-Datei laden
+load_dotenv()
+TOKEN = os.getenv("TOKEN")
+OWNER_ID = int(os.getenv("OWNER_ID"))
+
+# Bot initialisieren
+intents = discord.Intents.default()
+intents.members = True
+bot = discord.Bot(intents=intents)
+
+# GuardCheck initialisieren
+checker = GuardCheck("db/admins.json")
+
+@bot.event
+async def on_ready():
+    # Besitzer abrufen
+    owner = await bot.fetch_user(OWNER_ID)
+    
+    # Konsolenfarben aktivieren
+    init()
+    
+    # Interface anzeigen
+    display_bot_interface(
+        bot_name=bot.user.name,
+        owner_name=owner.name,
+        ping=bot.latency * 1000,
+        commands=command_count,
+        servers=len(bot.guilds),
+        cogs=loaded_cogs
+    )
+    
+    # Bot-Status setzen
+    await bot.change_presence(activity=discord.Activity(
+        type=discord.ActivityType.watching, 
+        name="den Server"
+    ))
+
+# Hauptprogramm
+if __name__ == "__main__":
+    # Cogs laden
+    loaded_cogs, command_count = load_all_cogs(bot)
+    
+    # Bot starten
+    bot.run(TOKEN)
+```
+
 ## Technische Details
 
 - Die `GuardList`-Klasse speichert Benutzer-IDs in einer JSON-Datei
@@ -204,6 +288,7 @@ error_embed = Embed(title="Fehler", color=Color.ERROR)
 - Beide Klassen unterstützen das Nachladen der Benutzerliste zur Laufzeit
 - Die `wizzycolor`-Funktionen bieten plattformübergreifende Unterstützung für farbige Konsolenausgaben
 - Die Farbunterstützung wird automatisch für Windows und Unix-basierte Systeme konfiguriert
+- Die `cog_loader`-Funktionen vereinfachen das dynamische Laden von Bot-Modulen
 
 ## Beitragen
 
