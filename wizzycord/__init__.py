@@ -17,6 +17,7 @@ from .wizzycolor import (
     create_message_line,
     display_status_line
 )
+from .cog_loader import load_all_cogs, load_specific_cog
 
 __all__ = [
     "GuardList", 
@@ -31,5 +32,7 @@ __all__ = [
     "display_cogs",
     "display_bot_interface",
     "create_message_line",
-    "display_status_line"
+    "display_status_line",
+    "load_all_cogs",
+    "load_specific_cog"
 ]
