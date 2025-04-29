@@ -20,6 +20,8 @@ class GuardCheck:
         _guard_list (GuardList): Instanz der GuardList-Klasse
     """
     _instance = None
+    _command_error_messages = {}  # Speichert Fehlermeldungen nach Befehlsnamen
+    _handler_registered = False   # Verfolgt, ob der Handler bereits registriert ist
     
     def __new__(cls, db_path=None):
         """
@@ -39,6 +41,34 @@ class GuardCheck:
             cls._instance.error_message = "Du hast keine Berechtigung, diesen Befehl zu verwenden."
             cls._instance._guard_list = GuardList(cls._instance.db_path)
         return cls._instance
+    
+    def setup_handler(self, bot):
+        """
+        Richtet den globalen Fehlerhandler ein.
+        
+        Args:
+            bot: Die Bot-Instanz
+        """
+        if not self.__class__._handler_registered:
+            @bot.event
+            async def on_application_command_error(ctx, error):
+                if isinstance(error, commands.CheckFailure):
+                    if ctx.command:
+                        # Holen der individuellen Fehlermeldung für diesen Befehl, falls vorhanden
+                        command_key = f"{ctx.command.qualified_name}"
+                        error_msg = self.__class__._command_error_messages.get(command_key, self.error_message)
+                        
+                        try:
+                            await ctx.respond(error_msg, ephemeral=True)
+                        except:
+                            # Falls bereits geantwortet wurde
+                            try:
+                                await ctx.send(error_msg, ephemeral=True)
+                            except:
+                                pass  # Im Notfall ignorieren
+            
+            self.__class__._handler_registered = True
+            print("GuardCheck-Fehlerhandler erfolgreich eingerichtet")
     
     def set_guard_list(self, path):
         """
@@ -120,10 +150,20 @@ class GuardCheck:
         Returns:
             function: Ein commands.check Decorator
         """
-        async def predicate(ctx):
-            if not self.is_listed(ctx.author.id):
-                message = custom_message if custom_message else self.error_message
-                await ctx.respond(message, ephemeral=True)
-                return False
-            return True
-        return commands.check(predicate)
+        def decorator(func):
+            # Speichern der benutzerdefinierten Fehlermeldung für diesen Befehl
+            if hasattr(func, "qualified_name"):
+                command_key = func.qualified_name
+            else:
+                command_key = func.__qualname__
+            
+            if custom_message:
+                self.__class__._command_error_messages[command_key] = custom_message
+            
+            # Der eigentliche Check ohne Antwortzustellung
+            @commands.check
+            async def predicate(ctx):
+                return self.is_listed(ctx.author.id)
+            
+            return predicate(func)
+        return decorator
