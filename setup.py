@@ -9,7 +9,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name="wizzycord",
-    version="0.3.0",  # Version aktualisiert wegen neuer Funktionalität
+    version="2.3.1",  
     author="Nowaro",
     author_email="dev@nowaro.de",
     description="Eine Bibliothek zur Verwaltung von Benutzerlisten, Cog-Verwaltung und farbige Konsolenausgaben mit Discord-Integration",
@@ -18,7 +18,7 @@ setup(
     url="https://github.com/nowaro-official/wizzycord",
     packages=find_packages(),
     install_requires=[
-        "py-cord>=2.1.0",
+        "py-cord>=2.0.0",
     ],
     classifiers=[
         "Programming Language :: Python :: 3",
